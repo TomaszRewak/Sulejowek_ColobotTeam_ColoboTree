@@ -73,27 +73,31 @@ app.MapPost("/chunks", async (GetAreaChunksInput input, ColoboTreeContext contex
 
 app.MapPost("/plot", async (GetPlotInput input, ColoboTreeContext context, CancellationToken cancellationToken) =>
 {
-    const int chunkAreaInSquareMeters = 1;
+GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+var rectangleCoordinates = input.polygon.Select(point => new Coordinate(point.X, point.Y)).ToArray();
 
-    var rectangleCoordinates = input.polygon.Select(point => new Coordinate(point.X, point.Y)).ToArray();
+if (IsCounterClockwise(rectangleCoordinates))
+    rectangleCoordinates = rectangleCoordinates.Reverse().ToArray();
 
-    if (IsCounterClockwise(rectangleCoordinates))
-        rectangleCoordinates = rectangleCoordinates.Reverse().ToArray();
+var rectangle = geometryFactory.CreatePolygon(rectangleCoordinates);
 
-    var rectangle = geometryFactory.CreatePolygon(rectangleCoordinates);
+var chunks = await context.AreaChunks
+    .Where(x => rectangle.Contains(x.BottomRightVertex4326) && rectangle.Contains(x.UpperLeftVertex4326)
+                                                            && x.Resolution == 1)
+    .Select(x => new
+    {
+        Response = new AreaChunkResponse(x.Id, x.UpperLeftVertex4326, x.BottomRightVertex4326, x.TreeId),
+        x.TreeCoveragePercentage
+    })
+    .ToListAsync(cancellationToken);
 
-    var chunks = await context.AreaChunks
-        .Where(x => rectangle.Contains(x.BottomRightVertex4326) && rectangle.Contains(x.UpperLeftVertex4326)
-                                                                && x.TreeClassification == 5)
-        .Select(x => new AreaChunkResponse(x.Id, x.UpperLeftVertex4326, x.BottomRightVertex4326, x.TreeId))
-        .ToListAsync(cancellationToken);
+var rectangleArea = AreaCalculator.CalculateArea(rectangle);
+var treeCoverage = (double)chunks.Sum(x => x.TreeCoveragePercentage ?? 0) / rectangleArea;
+var co2 = chunks.GroupBy(c => c.Response.TreeId)
+    .Select(x => Co2SequestrationFunctions.CalculateTreeLifetimeCo2Sequestration(x.Count())).Sum();
 
-    var rectangleArea = AreaCalculator.CalculateArea(rectangle);
-    var treeCoverage = chunks.Count * chunkAreaInSquareMeters / rectangleArea;
-
-    return new GetAreaResponse(rectangleArea, treeCoverage, chunks);
+    return new GetPlotResponse(rectangleArea, treeCoverage, co2);
 });
 
 bool IsCounterClockwise(Coordinate[] coordinates)

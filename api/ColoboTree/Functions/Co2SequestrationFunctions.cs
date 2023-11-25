@@ -9,9 +9,11 @@ public static class Co2SequestrationFunctions
 	private const double AverageCarbonInDryWeightRatio = 0.5;
 	private const double Co2ToCarbonRatio = 3.67;
 	
-    public static double CalculateTreeLifetimeCo2Sequestration(double diameter, double height = 5)
-    { 
-	    var greenWeightToHeightRatio = diameter >= ThresholdDiameter ? 0.15 : 0.25;
+    public static double CalculateTreeLifetimeCo2Sequestration(double crown, double height = 5)
+    {
+        var diameter = CalculateTrunkDiameter(crown);
+
+        var greenWeightToHeightRatio = diameter >= ThresholdDiameter ? 0.15 : 0.25;
         var greenWeightAboveGround = greenWeightToHeightRatio * Math.Pow(diameter, 2) * height;
         var totalGreenWeight = greenWeightAboveGround * AboveBelowGroundTreeRatio;
         var dryWeight = AverageDryMatterRatio * totalGreenWeight;
@@ -20,4 +22,6 @@ public static class Co2SequestrationFunctions
 		
         return co2Weight;
     }
+
+    private static double CalculateTrunkDiameter(double crownArea) => Math.Sqrt(crownArea) * 0.5;
 }
