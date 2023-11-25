@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from db import save_to_db
+from db import save_to_db, clear_db
 from importer import import_data
 from chunker import chunk_data
 from clusterer import cluster_trees
@@ -16,6 +16,8 @@ if __name__ == '__main__':
     print("Number of unique clusters: ", trees_clusters_df['tree_id'].nunique())
 
     #trees_clusters_df.to_json('data.json', orient='records')
+
+    clear_db()
     save_to_db(trees_clusters_df, 1)
 
     for resolution in [2, 5, 10, 20, 50]:
