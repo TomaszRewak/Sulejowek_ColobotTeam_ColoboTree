@@ -28,21 +28,31 @@ public partial class ColoboTreeContext : DbContext
 
             entity.ToTable("area_chunks");
 
-            entity.HasIndex(e => e.CenterPoint2180, "idx_area_chunks_center_point_2180").HasMethod("gist");
+            entity.HasIndex(e => e.UpperLeftVertex2180, "idx_area_chunks_center_point_2180").HasMethod("gist");
 
-            entity.HasIndex(e => e.CenterPoint4326, "idx_area_chunks_center_point_4326").HasMethod("gist");
+            entity.HasIndex(e => e.UpperLeftVertex4326, "idx_area_chunks_center_point_4326").HasMethod("gist");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CenterPoint2180)
+            entity.Property(e => e.UpperLeftVertex2180)
                 .HasColumnType("geometry(Point,2180)")
-                .HasColumnName("center_point_2180");
-            entity.Property(e => e.CenterPoint4326)
+                .HasColumnName("upper_left_vertex_2180");
+            entity.Property(e => e.UpperLeftVertex4326)
                 .HasColumnType("geometry(Point,4326)")
-                .HasColumnName("center_point_4326");
+                .HasColumnName("upper_left_vertex_4326");
+            entity.Property(e => e.BottomRightVertex2180)
+                .HasColumnType("geometry(Point,2180)")
+                .HasColumnName("bottom_right_vertex_2180");
+            entity.Property(e => e.BottomRightVertex4326)
+                .HasColumnType("geometry(Point,4326)")
+                .HasColumnName("bottom_right_vertex_4326");
             entity.Property(e => e.TreeClassification).HasColumnName("tree_classification");
             entity.Property(e => e.TreeCoveragePercentage)
                 .HasPrecision(10, 2)
                 .HasColumnName("tree_coverage_percentage");
+
+            entity.Property(e => e.TreeId).HasColumnName("tree_id");
+
+            entity.Property(e => e.Resolution).HasColumnName("resolution");
         });
 
         modelBuilder.Entity<Tree>(entity =>
