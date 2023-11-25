@@ -3,13 +3,8 @@ from db import save_to_db
 from importer import import_data
 from chunker import chunk_data
 from clusterer import cluster_trees
-import numpy as np
-
-
-def segmentation_cmap():
-    vals = np.linspace(0, 1, 256)
-    np.random.shuffle(vals)
-    return plt.cm.colors.ListedColormap(plt.cm.CMRmap(vals))
+from aggregator import aggregate_trees
+from plotter import plot_trees
 
 
 if __name__ == '__main__':
@@ -17,8 +12,17 @@ if __name__ == '__main__':
     trees_chunked_df = chunk_data(trees_df)
     trees_clusters_df = cluster_trees(trees_chunked_df)
 
-    save_to_db(trees_clusters_df)
+    print("Number of tree points: ", len(trees_clusters_df))
+    print("Number of unique clusters: ", trees_clusters_df['tree_id'].nunique())
+
+    #trees_clusters_df.to_json('data.json', orient='records')
+    save_to_db(trees_clusters_df, 1)
+
+    for resolution in [2, 5, 10, 20, 50]:
+        aggregated_trees_df = aggregate_trees(trees_clusters_df, resolution)
+
+        save_to_db(aggregated_trees_df, resolution)
 
     # plot
-    plt.scatter(trees_clusters_df['x'], trees_clusters_df['y'], s=1, c=trees_clusters_df['cluster'], cmap=segmentation_cmap())
-    plt.show()
+    plot_trees(trees_clusters_df, True)
+    plot_trees(aggregate_trees(trees_clusters_df, 10), False)
