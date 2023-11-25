@@ -19,8 +19,8 @@ def insert_chunk(chunk):
     with get_connection() as conn:
         with conn.cursor() as cur:
             query = """
-                INSERT INTO area_chunks (center_point_2180, center_point_4326, tree_coverage_percentage, tree_classification)
-                VALUES (ST_SetSRID(ST_MakePoint(%s, %s), 2180), ST_SetSRID(ST_MakePoint(%s, %s), 4326), %s, %s)
+                INSERT INTO area_chunks (center_point_2180, center_point_4326, tree_coverage_percentage, tree_classification, tree_id)
+                VALUES (ST_SetSRID(ST_MakePoint(%s, %s), 2180), ST_SetSRID(ST_MakePoint(%s, %s), 4326), %s, %s, %s)
             """
             cur.executemany(query, chunk)
             conn.commit()
@@ -28,9 +28,9 @@ def insert_chunk(chunk):
 
 def map_params(params):
     return [
-        (float(x), float(y), float(lon), float(lat), 100, 5)
-        for x, y, lon, lat
-        in zip(params['x'].values, params['y'].values, params['lon'].values, params['lat'].values)
+        (float(x), float(y), float(lon), float(lat), 100, 5, int(cluster))
+        for x, y, lon, lat, cluster
+        in zip(params['x'].values, params['y'].values, params['lon'].values, params['lat'].values, params['cluster'].values)
     ]
 
 
