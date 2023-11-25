@@ -9,7 +9,7 @@ public static class Co2SequestrationFunctions
 	private const double AverageCarbonInDryWeightRatio = 0.5;
 	private const double Co2ToCarbonRatio = 3.67;
 	
-    public static double CalculateTreeLifetimeCo2Sequestration(double height, double diameter)
+    public static double CalculateTreeLifetimeCo2Sequestration(double diameter, double height = 5)
     { 
 	    var greenWeightToHeightRatio = diameter >= ThresholdDiameter ? 0.15 : 0.25;
         var greenWeightAboveGround = greenWeightToHeightRatio * Math.Pow(diameter, 2) * height;

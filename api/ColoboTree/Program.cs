@@ -50,18 +50,6 @@ app.MapPost("/chunks", async (GetAreaChunksInput input, ColoboTreeContext contex
         new Coordinate(yMin, xMin)
     };
     
-    bool IsCounterClockwise(Coordinate[] coordinates)
-    {
-        double sum = 0;
-
-        for (int i = 0; i < coordinates.Length - 1; i++)
-        {
-            sum += (coordinates[i + 1].X - coordinates[i].X) * (coordinates[i + 1].Y + coordinates[i].Y);
-        }
-
-        return sum > 0;
-    }
-    
     if(IsCounterClockwise(rectangleCoordinates))
         rectangleCoordinates = rectangleCoordinates.Reverse().ToArray();
     
@@ -78,5 +66,43 @@ app.MapPost("/chunks", async (GetAreaChunksInput input, ColoboTreeContext contex
 
     return new GetAreaResponse(rectangleArea, treeCoverage, chunks);
 });
+
+
+app.MapPost("/plot", async (GetPlotInput input, ColoboTreeContext context, CancellationToken cancellationToken) =>
+{
+    const int chunkAreaInSquareMeters = 1;
+
+    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+    var rectangleCoordinates = input.polygon.Select(point => new Coordinate(point.X, point.Y)).ToArray();
+
+    if (IsCounterClockwise(rectangleCoordinates))
+        rectangleCoordinates = rectangleCoordinates.Reverse().ToArray();
+
+    var rectangle = geometryFactory.CreatePolygon(rectangleCoordinates);
+
+    var chunks = await context.AreaChunks
+        .Where(x => rectangle.Contains(x.BottomRightVertex4326) && rectangle.Contains(x.UpperLeftVertex4326)
+                                                                && x.TreeClassification == 5)
+        .Select(x => new AreaChunkResponse(x.Id, x.UpperLeftVertex4326, x.BottomRightVertex4326, x.TreeId))
+        .ToListAsync(cancellationToken);
+
+    var rectangleArea = AreaCalculator.CalculateArea(rectangle);
+    var treeCoverage = chunks.Count * chunkAreaInSquareMeters / rectangleArea;
+
+    return new GetAreaResponse(rectangleArea, treeCoverage, chunks);
+});
+
+bool IsCounterClockwise(Coordinate[] coordinates)
+{
+    double sum = 0;
+
+    for (int i = 0; i < coordinates.Length - 1; i++)
+    {
+        sum += (coordinates[i + 1].X - coordinates[i].X) * (coordinates[i + 1].Y + coordinates[i].Y);
+    }
+
+    return sum > 0;
+}
 
 app.Run();
