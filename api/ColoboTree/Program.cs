@@ -36,35 +36,38 @@ app.MapGet("/", async (ColoboTreeContext context, CancellationToken cancellation
 
 app.MapPost("/chunks", async (GetAreaChunksInput input, ColoboTreeContext context, CancellationToken cancellationToken) =>
 { 
-    const int chunkAreaInSquareMeters = 1;
-    
     var (yMin, xMin, yMax, xMax) = input;
     GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     
     var rectangleCoordinates = new[]
     {
-        new Coordinate(yMin, xMin),
-        new Coordinate(yMin, xMax),
-        new Coordinate(yMax, xMax),
-        new Coordinate(yMax, xMin),
-        new Coordinate(yMin, xMin)
+        new Coordinate(xMin, yMin),
+        new Coordinate(xMin, yMax),
+        new Coordinate(xMax, yMax),
+        new Coordinate(xMax, yMin),
+        new Coordinate(xMin, yMin)
     };
     
     if(IsCounterClockwise(rectangleCoordinates))
         rectangleCoordinates = rectangleCoordinates.Reverse().ToArray();
     
     var rectangle = geometryFactory.CreatePolygon(rectangleCoordinates);
+    var rectangleResolution = ResolutionFilter.GetResolutionForRectangle(rectangle);
     
     var chunks = await context.AreaChunks
         .Where(x => rectangle.Contains(x.BottomRightVertex4326) && rectangle.Contains(x.UpperLeftVertex4326) 
-                                                                && x.TreeClassification == 5)
-        .Select(x => new AreaChunkResponse(x.Id, x.UpperLeftVertex4326, x.BottomRightVertex4326, x.TreeId))
+                                                                && x.Resolution == rectangleResolution)
+        .Select(x => new
+        {
+            Response = new AreaChunkResponse(x.Id, x.UpperLeftVertex4326, x.BottomRightVertex4326, x.TreeId),
+            x.TreeCoveragePercentage
+        })
         .ToListAsync(cancellationToken);
     
     var rectangleArea = AreaCalculator.CalculateArea(rectangle);
-    var treeCoverage = chunks.Count * chunkAreaInSquareMeters / rectangleArea;
+    var treeCoverage = (double)chunks.Sum(x => x.TreeCoveragePercentage ?? 0) * Math.Pow(rectangleResolution, 2) / rectangleArea;
 
-    return new GetAreaResponse(rectangleArea, treeCoverage, chunks);
+    return new GetAreaResponse(rectangleArea, treeCoverage, chunks.Select(x => x.Response).ToList());
 });
 
 
