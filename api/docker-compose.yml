@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  colobotree.api:
+    image: ${DOCKER_REGISTRY-}colobotree
+    build:
+      context: .
+      dockerfile: ColoboTree/Dockerfile
+
+  postgres:
+    image: nickblah/postgis
+
+volumes:
+  postgres:
