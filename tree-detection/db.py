@@ -8,7 +8,7 @@ def get_connection():
     return psycopg2.connect(connection_string)
 
 
-def delete_all():
+def clear_db():
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM area_chunks")
@@ -85,8 +85,6 @@ def split_to_chunks(params):
 
 
 def save_to_db(data, resolution):
-    delete_all()
-
     params = map_params(data, resolution)
     params_chunks = split_to_chunks(params)
 
