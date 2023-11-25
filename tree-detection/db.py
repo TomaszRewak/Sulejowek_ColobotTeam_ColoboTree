@@ -1,6 +1,6 @@
 import psycopg2
 
-connection_string = "dbname='postgres' user='postgres' host='4.tcp.eu.ngrok.io' port='14858' password='password'"
+connection_string = "dbname='postgres' user='postgres' host='localhost' port='2137' password='password'"
 chunk_size = 1000
 
 

@@ -6,7 +6,7 @@ public static class DistanceCalculator
 {
     public static double CalculateHaversineDistance(Coordinate point1, Coordinate point2)
     {
-        const double EarthRadius = 6371000; // in meters
+        const double earthRadiusInMeters = 6371000;
 
         double dLat = Math.PI / 180 * (point2.Y - point1.Y);
         double dLon = Math.PI / 180 * (point2.X - point1.X);
@@ -17,6 +17,6 @@ public static class DistanceCalculator
 
         double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
 
-        return EarthRadius * c;
+        return earthRadiusInMeters * c;
     }
 }
