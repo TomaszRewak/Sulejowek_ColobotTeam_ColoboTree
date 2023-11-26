@@ -79,6 +79,8 @@ import type { Plot } from '@/types/plot.type'
 import type { Chunk } from '@/types/chunk.type'
 import { createDebouncedFunction, getRandomColor } from '../../utils'
 import { getChunks } from '../../services/chunk.service'
+import { postGetChunks } from '../../services/chunk.service'
+
 
 const map = ref<L.Map | null>(null)
 const center: LatLngExpression = [52.24645266846282, 21.281910094983104]
@@ -118,14 +120,14 @@ onMounted(() => {
 const getDatasetChunks = async () => {
   if (map.value instanceof L.Map) {
     const bounds = map.value.getBounds()
-    const result = await getChunks(bounds.getNorthEast(), bounds.getSouthWest())
-    if (result === 'produ') {
-      state.chunks = result
+    const result = await postGetChunks(bounds.getNorthEast(), bounds.getSouthWest())
+    // if (result === 'produ') {
+      state.chunks = result.chunks
       addTrees(state.chunks)
-    } else {
-      state.chunks = data.chunks as Chunk[]
-      addTrees(state.chunks)
-    }
+    // } else {
+    //   state.chunks = data.chunks as Chunk[]
+    //   addTrees(state.chunks)
+    // }
   }
 }
 
@@ -143,11 +145,8 @@ const loadPlots = () => {
 }
 
 const handleZoomEnd = createDebouncedFunction(() => {
-  const zoom = map.value?.getZoom()
-  if (zoom) {
-    zoom >= 16 ? loadPlots() : clearPlots()
-    zoom === 18 ? getDatasetChunks() : clearChunks()
-  }
+  loadPlots()
+  getDatasetChunks()
 }, 500)
 
 const createSquare = (chunk: Chunk) => {
@@ -162,6 +161,7 @@ const createSquare = (chunk: Chunk) => {
 }
 
 const addTrees = (chunks: Chunk[]) => {
+  clearChunks()
   chunks.forEach((chunk) => {
     const square = createSquare(chunk)
     square.on('click', () => handleSquareClick(chunk))
@@ -171,6 +171,7 @@ const addTrees = (chunks: Chunk[]) => {
 }
 
 const addPlots = (plots: Plot[]) => {
+  clearPlots()
   plots.forEach((plot: Plot) => {
     const polygon = L.polygon(plot.polygon, { color: '#7babca', fill: false, weight: 1 })
     polygon.on('click', () => handlePolygonClick(plot))

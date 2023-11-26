@@ -4,7 +4,7 @@ namespace ColoboTree.Functions;
 
 public static class ResolutionFilter
 {
-    private const double BaseRectangleWidthInDegrees = 0.0035474408498d;  //X
+    private const double BaseRectangleWidthInDegrees = 0.0085474408498d;  //X
     private static readonly int[] Resolutions = new[]{1, 2, 5, 10, 20, 50};
     
     public static int GetResolutionForRectangle(Polygon rectangle)

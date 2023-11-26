@@ -18,7 +18,14 @@ builder.Services.ConfigureHttpJsonOptions(x => x.SerializerOptions.Converters.Ad
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+{
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
+
 var app = builder.Build();
+
+app.UseCors("corsapp");
 
 if (app.Environment.IsDevelopment())
 {
@@ -55,7 +62,7 @@ app.MapPost("/chunks", async (GetAreaChunksInput input, ColoboTreeContext contex
     
     var chunks = await context.AreaChunks
         .Where(x => rectangle.Contains(x.BottomRightVertex4326) && rectangle.Contains(x.UpperLeftVertex4326) 
-                                                                && x.Resolution == rectangleResolution)
+                                                                && x.Resolution == 1)
         .Select(x => new
         {
             Response = new AreaChunkResponse(x.Id, x.UpperLeftVertex4326, x.BottomRightVertex4326, x.TreeId),
