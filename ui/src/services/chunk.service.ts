@@ -1,13 +1,5 @@
+import type { Coords } from '@/types'
 import axios from 'axios'
-
-export const getChunks = async (northEast: L.LatLng, southWest: L.LatLng) => {
-  try {
-    const response = await axios.get(`?${northEast}?${southWest}`)
-    return response.data
-  } catch (error) {
-    console.error('Error fetching data:', error)
-  }
-}
 
 export const postGetChunks = async (northEast: L.LatLng, southWest: L.LatLng) => {
   try {
@@ -25,7 +17,7 @@ export const postGetChunks = async (northEast: L.LatLng, southWest: L.LatLng) =>
   }
 }
 
-export const postGetPlot = async (northEast: L.LatLng, southWest: L.LatLng) => {
+export const postGetPlot = async (northEast: Coords, southWest: Coords) => {
   try {
     const response = await axios.post(`https://localhost:7178/plot`, 
     {
