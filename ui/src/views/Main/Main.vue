@@ -158,7 +158,7 @@ const createSquare = (chunk: Chunk) => {
     [chunk.upperLeftVertex4326.coordinates[1], chunk.bottomRightVertex4326.coordinates[0]]
   ] as LatLngExpression[]
 
-  return L.polygon(squareCoordinates, { color: getRandomColor(chunk.treeId) })
+  return L.polygon(squareCoordinates, { color: getRandomColor(chunk.treeId ?? chunk.id) })
 }
 
 const addTrees = (chunks: Chunk[]) => {
