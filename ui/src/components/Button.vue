@@ -6,28 +6,28 @@
 </template>
 
 <script lang="ts">
-import { ref, defineProps, defineEmits, computed } from 'vue';
+import { computed } from 'vue'
 
 export default {
   props: {
     variant: {
       type: String,
-      default: 'primary',
-    },
+      default: 'primary'
+    }
   },
   setup(props, { emit }) {
-    const buttonClass = computed(() => `button ${props.variant}`);
+    const buttonClass = computed(() => `button ${props.variant}`)
 
     const handleClick = () => {
-      emit('click');
-    };
+      emit('click')
+    }
 
     return {
       buttonClass,
-      handleClick,
-    };
-  },
-};
+      handleClick
+    }
+  }
+}
 </script>
 
 <style scoped>

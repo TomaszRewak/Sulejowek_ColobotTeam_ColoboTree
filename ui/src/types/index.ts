@@ -1,2 +1,2 @@
-export * from './plot.type';
-export * from './chunk.type';
+export * from './plot.type'
+export * from './chunk.type'

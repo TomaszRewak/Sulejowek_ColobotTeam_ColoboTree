@@ -1,5 +1,36 @@
-  const COLORS = ['#FF5733', '#33FF57', '#5733FF', '#33FFFF', '#FF33A1', '#A133FF', '#FF3333', '#33FFD1', '#FFD133', '#9B33FF', '#FFA133', '#FF33F2', '#33C7FF', '#7D33FF', '#33FF8C', '#FF8C33', '#3387FF', '#FF3370', '#3370FF'];
-    
-  export const getRandomColor = (value: number)  => {
-    return COLORS[value % COLORS.length] 
-  }
+const COLORS = [
+    '#5c8ca8',
+    '#3f9da6',
+    '#20aea5',
+    '#00bf9f',
+    '#00c982',
+    '#00cc66',
+    '#00ce4a',
+    '#2cd135',
+    '#4dcc1f',
+    '#6ed90a',
+    '#8fdd04',
+    '#afd700',
+    '#c4d300',
+    '#d7d800',
+    '#e8da00',
+    '#f8dc00',
+    '#f5d200',
+    '#f3c700',
+    '#f0bc00',
+    '#eda100',
+    '#ea9700',
+    '#e68d00',
+    '#e28300',
+    '#df7800',
+    '#dc6e00',
+    '#d96400',
+    '#d65a00',
+    '#d35000',
+    '#d04600',
+    '#cc3c00',
+]
+
+export const getRandomColor = (value: number) => {
+  return COLORS[value % COLORS.length]
+}

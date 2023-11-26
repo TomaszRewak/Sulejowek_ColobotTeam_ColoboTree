@@ -16,11 +16,14 @@
     />
 
     <div v-if="inputValue" class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer">
-      <p @click="clearInput"> X</p>
+      <p @click="clearInput">X</p>
     </div>
 
     <transition name="fade">
-      <ul v-if="showSuggestions && filteredSuggestions.length" class="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-[32rem] overflow-auto">
+      <ul
+        v-if="showSuggestions && filteredSuggestions.length"
+        class="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-[32rem] overflow-auto"
+      >
         <li
           v-for="suggestion in filteredSuggestions"
           :key="suggestion[displayKey]"
@@ -35,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
@@ -45,45 +48,46 @@ const props = defineProps({
   searchKey: { type: String, required: true },
   displayKey: { type: String, required: true },
   leftIcon: Boolean
-});
+})
 
-const emits = defineEmits(['update:modelValue']);
+const emits = defineEmits(['update:modelValue'])
 
-const inputValue = ref(props.modelValue[props.displayKey]);
-const showSuggestions = ref(false);
+const inputValue = ref(props.modelValue[props.displayKey])
+const showSuggestions = ref(false)
 
 const handleInput = () => {
-  emits('update:modelValue', inputValue.value);
-};
-
+  emits('update:modelValue', inputValue.value)
+}
 
 const filteredSuggestions = computed(() => {
   if (inputValue.value) {
-    const inputLowerCase = inputValue.value.toLowerCase();
+    const inputLowerCase = inputValue.value.toLowerCase()
     return props.suggestions.filter((suggestion: any) =>
       suggestion[props.searchKey].toLowerCase().includes(inputLowerCase)
-    );
+    )
   }
-  return props.suggestions;
-});
+  return props.suggestions
+})
 
 const selectSuggestion = (suggestion: any) => {
-  inputValue.value = suggestion[props.displayKey];
-  showSuggestions.value = false;
-  emits('update:modelValue', inputValue.value);
-};
+  inputValue.value = suggestion[props.displayKey]
+  showSuggestions.value = false
+  emits('update:modelValue', inputValue.value)
+}
 
 const clearInput = () => {
-  inputValue.value = {};
+  inputValue.value = {}
   emits('update:modelValue', {})
-};
+}
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s;
 }
-.fade-enter, .fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

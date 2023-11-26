@@ -1,6 +1,6 @@
-import type { LatLngExpression } from "leaflet";
+import type { LatLngExpression } from 'leaflet'
 
 export type Plot = {
-    id: string;
-    polygon: LatLngExpression[]
+  id: string
+  polygon: LatLngExpression[]
 }
