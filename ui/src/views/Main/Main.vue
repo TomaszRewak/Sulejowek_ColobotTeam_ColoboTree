@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div v-show="state.isLoading" id="loader" class="fixed z-20 top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-8 border-white-500"></div>
+    </div>
     <div class="w-screen max-h-screen h-screen z-10" id="map"></div>
     <div class="absolute top-5 right-5 z-20">
       <ct-text-input
@@ -21,12 +24,12 @@
         </template>
         <div class="flex items-center py-4 border-b-2">
           <img class="w-6 h-6" src="../../assets/icons/co2.png" />
-          <p class="ml-4 text-sm">Aktualny wpływ CO2: <span class="font-semibold">12</span></p>
+          <p class="ml-4 text-sm">Aktualny wpływ CO2: <span class="font-semibold">{{ state.plotData.co2Sequestration ?? '12'}}</span></p>
         </div>
         <div class="flex items-center py-4 border-b-2">
           <img class="w-6 h-6" src="../../assets/icons/nature.png" />
           <p class="ml-4 text-sm">
-            Aktualny stopień zalesienia: <span class="font-semibold">30%</span>
+            Aktualny stopień zalesienia: <span class="font-semibold">{{ state.plotData.co2Sequestration ?? '30%' }}</span>
           </p>
         </div>
         <div class="flex items-center py-4 border-b-2">
@@ -74,12 +77,10 @@ import { ref, onMounted, reactive, watch } from 'vue'
 import 'leaflet/dist/leaflet.css'
 import L, { type LatLngExpression, type MapOptions } from 'leaflet'
 import plotsData from '../../../../resources/plots.json'
-import data from '../../../../resources/data.json'
-import type { Plot } from '@/types/plot.type'
+import type { Plot, PlotData } from '@/types/plot.type'
 import type { Chunk } from '@/types/chunk.type'
 import { createDebouncedFunction, getRandomColor } from '../../utils'
-import { getChunks } from '../../services/chunk.service'
-import { postGetChunks } from '../../services/chunk.service'
+import { postGetChunks, postGetPlot } from '../../services/chunk.service'
 
 
 const map = ref<L.Map | null>(null)
@@ -92,9 +93,11 @@ const state = reactive({
   chunksLayer: L.layerGroup(),
   plotsLayer: L.layerGroup(),
   picked: {} as Plot,
+  plotData: {} as PlotData,
   pickedTree: {} as Chunk,
   searchInput: {} as Plot,
-  searchSuggestions: plots
+  searchSuggestions: plots,
+  isLoading: true
 })
 
 onMounted(() => {
@@ -113,23 +116,20 @@ onMounted(() => {
     map.value as L.Map
   )
   map.value!.on('zoomend', handleZoomEnd)
-
   loadPlots()
+  state.isLoading = false
 })
 
 const getDatasetChunks = async () => {
+    state.isLoading = true 
   if (map.value instanceof L.Map) {
     const bounds = map.value.getBounds()
     const result = await postGetChunks(bounds.getNorthEast(), bounds.getSouthWest())
-    // if (result === 'produ') {
       state.chunks = result.chunks
       addTrees(state.chunks)
-    // } else {
-    //   state.chunks = data.chunks as Chunk[]
-    //   addTrees(state.chunks)
-    // }
   }
-}
+    state.isLoading = false
+  }
 
 const clearChunks = () => {
   state.chunks = []
@@ -145,7 +145,6 @@ const loadPlots = () => {
 }
 
 const handleZoomEnd = createDebouncedFunction(() => {
-  loadPlots()
   getDatasetChunks()
 }, 500)
 
@@ -201,8 +200,13 @@ const handleSquareClick = (chunk: any) => {
   state.pickedTree = chunk
 }
 
-const handlePolygonClick = (plot: any) => {
+const handlePolygonClick = async (plot: Plot) => {
   state.picked = plot
+    const northEast = {lat: (plot.polygon[1] as any)[0], lng: (plot.polygon[1] as any)[1]}
+    const southWest = {lat: (plot.polygon[2] as any)[0], lng: (plot.polygon[2] as any)[1]}
+  const result = await postGetPlot(northEast, southWest )
+  state.plotData = result
+
 }
 
 watch(
